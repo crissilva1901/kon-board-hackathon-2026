@@ -1,4 +1,4 @@
-# KON Board — Konverto Hackathon 2026
+# KON Board - Konverto Hackathon 2026
 
 Interactive dashboard built from the fictional Konverto Labs hackathon dataset.
 
