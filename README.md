@@ -31,4 +31,4 @@ All organizations and prices are **fictional examples supplied for the hackathon
 This repository contains the KON Board frontend, not a production KON Dash application. Saved financial scenarios remain local to the browser and are not synchronized across devices.
 
 ## Attribution and licensing
-Challenge materials and sample data were supplied by Konverto Labs. Confirm redistribution permissions before publishing the supplied dataset publicly. No open-source license is granted by default.
+Challenge materials and sample data were supplied by Konverto Labs. 
