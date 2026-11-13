@@ -4,7 +4,7 @@ Interactive dashboard built from the fictional Konverto Labs hackathon dataset.
 
 ## Demo
 
-New hosting target (enable under Settings → Pages): https://crissilva1901.github.io/kon-board-hackathon-2026/
+ https://crissilva1901.github.io/kon-board-hackathon-2026/
 
 
 ## Files
