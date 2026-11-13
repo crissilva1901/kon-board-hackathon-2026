@@ -6,7 +6,6 @@ Interactive dashboard built from the fictional Konverto Labs hackathon dataset.
 
 New hosting target (enable under Settings → Pages): https://crissilva1901.github.io/kon-board-hackathon-2026/
 
-Earlier Netlify deployment: https://konboard.netlify.app/
 
 ## Files
 
@@ -31,10 +30,4 @@ This is a browser-only interactive prototype. Finance scenario changes are saved
 
 ## Data permissions
 
-Sample records originate from hackathon materials provided by Konverto Labs. Confirm redistribution terms before sharing the repository publicly.
-
-## Enable GitHub Pages (one-time setup)
-
-Open **Settings → Pages**, set **Build and deployment** to **Deploy from a branch**, choose **main** and **/(root)**, and click **Save**. Public repositories are eligible for GitHub Pages on the free tier. GitHub Pages may take a little time to publish the new commit.
-
-Whenever the code in the `main` branch changes, GitHub Pages redeploys automatically.
+Sample records originate from hackathon materials provided by Konverto Labs. 
