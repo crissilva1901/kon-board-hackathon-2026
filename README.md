@@ -1,45 +1,40 @@
 # KON Board — Konverto Hackathon 2026
 
-Interactive, browser-based analytics and financial scenario prototype for the Konverto Labs Hackathon 2026.
+Interactive dashboard built from the fictional Konverto Labs hackathon dataset.
 
-**Live demo:** https://konboard.netlify.app/
+## Demo
 
-## Repository structure
+New hosting target (enable under Settings → Pages): https://crissilva1901.github.io/kon-board-hackathon-2026/
 
-- `index.html` — page structure, navigation and dashboard components
-- `style.css` — purple / dark-green visual identity and responsive styles
-- `app.js` — analytics, controls, visualizations, filtering and financial simulator
-- `data.json` — fictional hackathon dataset supplied for the challenge
+Earlier Netlify deployment: https://konboard.netlify.app/
 
-## Features
+## Files
 
-- Adoption analytics and usage trends
-- What People Build: assets, use cases, combinations and sharing
-- AI spending and data exploration
-- Cross-organization comparison
-- Who Pays: customer / Konverto / unassigned cost allocation and recurring Azure cost scenarios
-- Data quality and insights, including missing reports versus recorded zeros
+- `index.html`: page markup and interactive controls
+- `style.css`: styles and responsive layout
+- `app.js`: interactive charts, filters and Who Pays simulator
+- `data.json`: original fictional hackathon dataset
 
-## Run locally
+## Local usage
 
-Because the app loads `data.json` using `fetch()`, **do not open `index.html` directly from the filesystem**. Serve this folder using a static HTTP server.
-
-With Python installed:
+Run a static web server in the repository folder, for example:
 
 ```bash
 python -m http.server 8000
 ```
 
-Then visit `http://localhost:8000` in a browser.
+Open `http://localhost:8000`. Opening `index.html` as a `file://` URL will not load `data.json` in browsers that block local fetches.
 
-For the public demonstration, deploy all four files **together** at the root of a static host such as Netlify. The live website is a separate deployment and will not update automatically merely because this GitHub repository changes, unless a GitHub-to-Netlify integration is configured.
+## Notes
 
-## Data and scope
+This is a browser-only interactive prototype. Finance scenario changes are saved in that browser's local storage; they are not written back to the JSON or shared across devices. The supplied dataset is fictional and May and November are partial months. Missing reports are not equivalent to zero usage.
 
-The dataset includes fictional organizations, expenses, AI models, daily reports and KON Dash usage examples for the hackathon. May and November are partial months. A missing usage report is not the same as a report with zero activity. Cached input tokens are part of input totals. The sample KON Dash records are not directly reconciled with usage totals.
+## Data permissions
 
-This is a **frontend demonstration**, not a production billing application. Scenario changes are stored in each browser's local storage, not in a shared backend. No live Azure billing or third-party API integration is performed.
+Sample records originate from hackathon materials provided by Konverto Labs. Confirm redistribution terms before sharing the repository publicly.
 
-## Permissions
+## Enable GitHub Pages (one-time setup)
 
-Konverto Labs supplied the challenge materials and sample data. Confirm redistribution permissions before making the repository public or sharing it outside the hackathon. This repository does not include an open-source license.
+Open **Settings → Pages**, set **Build and deployment** to **Deploy from a branch**, choose **main** and **/(root)**, and click **Save**. Public repositories are eligible for GitHub Pages on the free tier. GitHub Pages may take a little time to publish the new commit.
+
+Whenever the code in the `main` branch changes, GitHub Pages redeploys automatically.
