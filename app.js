@@ -135,7 +135,63 @@ function show(id){pages.forEach(p=>$(p).hidden=p!==id);Object.keys(navMap).forEa
 // Capture new navigation before legacy "coming soon" listeners; preserve existing legacy pages.
 for(const id of ['navAdoption','navBuild','navSpending','navComparison','navIntegration','navInsights'])$(id).addEventListener('click',e=>{e.stopImmediatePropagation();show(navMap[id])},true);
 for(const id of ['navOverview','navOrganizations','navSimulator','navDash'])$(id).addEventListener('click',()=>{for(const x of ['adoptionPage','buildPage','spendingPage','comparisonPage','integrationPage','insightsPage'])$(x).hidden=true;},false);
-$('intGoDash').onclick=()=>$('navDash').click();$('intGoBuild').onclick=()=>show('buildPage');
+
+// Integrated system — entirely sourced from konboard-hackathon.json.
+// Configuration graph + example references are not equated with aggregate usage.
+const dgOrg=$('dgOrg'),dgType=$('dgType'),dgTool=$('dgTool'),dgPeriod=$('dgPeriod');
+const dgK=data.kondash;
+const dgTypes={agents:'Agent',apps:'App',scheduledTasks:'Scheduled task'};
+const dgById={};Object.entries(dgK).forEach(([kind,rows])=>{if(Array.isArray(rows))rows.forEach(record=>{dgById[record.id]={kind,record}})});
+const dgName=id=>dgById[id]?.record.name||id;
+const dgPill=(s,sub)=>`<div class="dg-linked-item"><b>${esc(s)}</b>${sub?`<small>${esc(sub)}</small>`:''}</div>`;
+const dgWords=(ids,kind)=>ids.map(id=>({id,kind,name:dgName(id)}));
+function dgConnections(record){
+ const edges=[];
+ const map={knowledgeBaseIds:'Knowledge base',pluginIds:'Plugin',skillIds:'Skill',mcpServerIds:'MCP server',appIds:'App'};
+ for(const [field,label] of Object.entries(map))for(const id of record[field]||[])edges.push({id,label,name:dgName(id)});
+ if(record.agentId)edges.push({id:record.agentId,label:'Assigned agent',name:dgName(record.agentId)});
+ if(record.ownerGroupId)edges.push({id:record.ownerGroupId,label:'Owner group',name:dgName(record.ownerGroupId)});
+ return edges;
+}
+function dgSetupOrg(){dgOrg.innerHTML=data.organizations.map(o=>`<option value="${esc(o.id)}">${esc(o.name)}</option>`).join('');dgOrg.value=data.organizations.some(x=>x.id==='org-harbor')?'org-harbor':firstOrg;
+ dgPeriod.innerHTML='<option value="all">Full dataset period</option>'+months.map(m=>`<option value="${m}">${m}</option>`).join('');
+ dgRefreshTool(true)}
+function dgRefreshTool(reset=false){let rows=dgK[dgType.value].filter(x=>x.organizationId===dgOrg.value);let old=dgTool.value;
+ dgTool.innerHTML=rows.length?rows.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join(''):'<option value="">No records in this category</option>';
+ if(!reset&&rows.some(x=>x.id===old))dgTool.value=old;
+ else if(dgOrg.value==='org-harbor'&&dgType.value==='agents'&&rows.some(x=>x.id==='harbor-agt-02'))dgTool.value='harbor-agt-02';
+ dgRender();}
+function dgRender(){const org=dgOrg.value,kind=dgType.value,record=dgK[kind].find(x=>x.organizationId===org&&x.id===dgTool.value);
+ const orgData=data.organizations.find(x=>x.id===org);
+ const rows=data.dailyUsage.filter(r=>r.organizationId===org&&(dgPeriod.value==='all'||r.date.startsWith(dgPeriod.value)));
+ const totals={tokens:s(rows,'totalTokens'),cost:s(rows,'totalCostUsd'),kb:s(rows,'knowledgeBaseSearches'),tool:s(rows,'toolCalls')};
+ const inventory=dgK[kind].filter(x=>x.organizationId===org),kbRecords=dgK.knowledgeBases.filter(x=>x.organizationId===org);
+ const chats=record?dgK.chats.filter(c=>c.organizationId===org&&((kind==='agents'&&c.selectedAgentId===record.id)||(kind==='scheduledTasks'&&c.isScheduledTaskChat&&c.selectedAgentId===record.agentId))):[];
+ const events=kind==='scheduledTasks'&&Array.isArray(record?.recentEvents)?record.recentEvents:[];
+ if(!record){$('dgSelected').innerHTML='<div class="empty">No recorded tools of this type for this organization.</div>';$('dgLinks').innerHTML='<div class="empty">No connections to inspect.</div>';$('dgTraces').innerHTML='<div class="empty">No tool-specific traces.</div>'}
+ else {
+ let detail=`<div class="dg-tool-type">${esc(dgTypes[kind])} · Source ID: ${esc(record.id)}</div><h3>${esc(record.name)}</h3><p>${esc(record.description||record.prompt||'No description supplied.')}</p>`;
+ if(kind==='agents')detail+=`<div class="dg-facts"><span>Origin: ${esc(record.origin==='createdByOrganization'?'Created by organization':record.origin==='preinstalledByKonDash'?'Preinstalled by KON Dash':record.origin||'Not specified')}</span><span>Access: ${record.isPublic?'Public flag: true':'Public flag: false'}</span></div>`;
+ if(kind==='apps')detail+=`<div class="dg-facts"><span>Status: ${esc(record.status||'Not specified')}</span><span>Listed in library: ${record.isListedInLibrary?'Yes':'No'}</span></div>`;
+ if(kind==='scheduledTasks')detail+=`<div class="dg-facts"><span>Schedule: ${esc(record.cronExpression||'Not specified')}</span><span>Timezone: ${esc(record.timeZoneId||'Not specified')}</span><span>Enabled: ${record.isEnabled?'Yes':'No'}</span></div>`;
+ $('dgSelected').innerHTML=detail;
+ const links=dgConnections(record);let linkHtml=links.length?`<div class="dg-link-stack">${links.map(l=>dgPill(l.name,l.label)).join('')}</div>`:'<p class="dg-quiet">No outgoing links are recorded for this tool.</p>';
+ // Show one additional hop for scheduled tasks: task -> agent -> knowledge/tools.
+ if(kind==='scheduledTasks'&&record.agentId&&dgById[record.agentId]){let agent=dgById[record.agentId].record,linked=dgConnections(agent).filter(l=>l.label!=='Owner group');if(linked.length)linkHtml+=`<div class="dg-subhead">Through ${esc(agent.name)}</div><div class="dg-link-stack">${linked.map(l=>dgPill(l.name,l.label)).join('')}</div>`;}
+ $('dgLinks').innerHTML=linkHtml;
+ if(kind==='agents'){
+  $('dgTraces').innerHTML=`<div class="dg-trace-head"><strong>${fmt(chats.length)} sample chat${chats.length===1?'':'s'}</strong><small>Reference this agent via selectedAgentId</small></div>`+(chats.length?`<div class="dg-trace-list">${chats.slice(0,4).map(c=>`<div>${esc(c.title)}<small>${esc(c.modified||'')}</small></div>`).join('')}</div>`:'<p class="dg-quiet">No example chat references this agent in the supplied sample.</p>');
+ } else if(kind==='scheduledTasks'){
+  $('dgTraces').innerHTML=`<div class="dg-trace-head"><strong>${fmt(events.length)} recent event${events.length===1?'':'s'}</strong><small>From the scheduled-task record</small></div>${events.length?`<div class="dg-trace-list">${events.slice(0,4).map(e=>`<div>${esc(e.status||e.result||e.eventType||'Recorded event')}<small>${esc(e.executedAt||e.startedAt||e.startedAtUtc||e.timestamp||e.dateTime||'')}</small></div>`).join('')}</div>`:'<p class="dg-quiet">No recent execution events in this record.</p>'}<p class="dg-mini">Last executed: ${esc(record.lastExecutedAt||'Not recorded')}</p>`;
+ } else {$('dgTraces').innerHTML=`<div class="dg-trace-head"><strong>App configuration</strong><small>Source inventory, not execution telemetry</small></div><p class="dg-quiet">The dataset records this app and its connected resources, but does not provide an app-specific execution log or cost.</p>`;}
+ }
+ const metricRows=[['Inventory',fmt(inventory.length),`${dgTypes[kind]} records in organization`],['Org knowledge bases',fmt(kbRecords.length),'All knowledge bases in organization'],['AI tokens',fmt(totals.tokens),'Organization · selected period'],['AI usage cost',usd(totals.cost),'Organization · selected period']];
+ $('dgMetrics').innerHTML=metricRows.map(([a,b,c])=>`<div class="dg-metric"><small>${esc(a)}</small><strong>${esc(b)}</strong><span>${esc(c)}</span></div>`).join('');
+ const reported=new Set(rows.map(x=>x.date)).size;
+ $('dgMetricsNote').innerHTML=`<div class="dg-muted-foot">${fmt(reported)} dates with reported usage · ${fmt(totals.kb)} knowledge-base searches · ${fmt(totals.tool)} tool calls. These numbers describe <strong>${esc(orgData.name)} overall</strong>, not ${record?esc(record.name):'the selected tool'}.</div>`;
+}
+dgOrg.addEventListener('change',()=>dgRefreshTool(true));dgType.addEventListener('change',()=>dgRefreshTool(true));dgTool.addEventListener('change',dgRender);dgPeriod.addEventListener('change',dgRender);
+dgSetupOrg();
 function fillOrg(id,all=true){$(id).innerHTML=(all?'<option value="all">All organizations</option>':'')+data.organizations.map(o=>`<option value="${esc(o.id)}">${esc(o.name)}</option>`).join('')}
 function fillMonth(id,all=true){$(id).innerHTML=(all?'<option value="all">All months · May–Nov 2026</option>':'')+months.map(m=>`<option value="${m}">${new Date(m+'-02T00:00:00Z').toLocaleString('en-US',{month:'long',year:'numeric',timeZone:'UTC'})}</option>`).join('')}
 ['adOrg','buildOrg','spOrg'].forEach(id=>fillOrg(id));['cpA','cpB'].forEach(id=>fillOrg(id,false));['adMonth','spMonth','cpMonth'].forEach(id=>fillMonth(id));$('cpA').value=firstOrg;$('cpB').value=data.organizations[1].id;

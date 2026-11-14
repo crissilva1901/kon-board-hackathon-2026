@@ -1,33 +1,15 @@
-# KON Board - Konverto Hackathon 2026
+# KON Board — Integrated system grounded in supplied dataset
 
-Interactive dashboard built from the fictional Konverto Labs hackathon dataset.
+Open **ABRIR_KON_BOARD.html** directly in Chrome for the offline presentation.
 
-## Demo
+For web hosting, upload **index.html, style.css, app.js, data.json** into the same folder.
 
- https://crissilva1901.github.io/kon-board-hackathon-2026/
+The Integrated system page uses only the supplied fictional `konboard-hackathon.json` data. The tool selector, linked knowledge/tools, sample chat records, scheduled events, organization-level usage and cost figures are all derived from it.
 
+Individual tool-level spending and token use cannot be inferred from the dataset; chat records are samples. The UI says so. No Customer Support Assistant, Shipping Cost Calculator or Daily Shipment Report demo objects were inserted.
 
-## Files
+All other KON Board screens and the Who Pays simulator are unchanged.
 
-- `index.html`: page markup and interactive controls
-- `style.css`: styles and responsive layout
-- `app.js`: interactive charts, filters and Who Pays simulator
-- `data.json`: original fictional hackathon dataset
+The Integrated system closing action panel and Interpretation boundary footer have been removed, leaving the four evidence panels intact.
 
-## Local usage
-
-Run a static web server in the repository folder, for example:
-
-```bash
-python -m http.server 8000
-```
-
-Open `http://localhost:8000`. Opening `index.html` as a `file://` URL will not load `data.json` in browsers that block local fetches.
-
-## Notes
-
-This is a browser-only interactive prototype. Finance scenario changes are saved in that browser's local storage; they are not written back to the JSON or shared across devices. The supplied dataset is fictional and May and November are partial months. Missing reports are not equivalent to zero usage.
-
-## Data permissions
-
-Sample records originate from hackathon materials provided by Konverto Labs. 
+Integrated system: condensed executive header and discreet source information; underlying records and metrics unchanged.
