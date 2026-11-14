@@ -1,0 +1,8 @@
+KON Dash — versão corrigida
+
+Windows: abre ABRIR_KON_DASH.html no Chrome.
+GitHub Pages: publica index.html, style.css, app.js e data.json na mesma pasta.
+
+TESTE: seleciona Harbor Logistics, abre Discover tools, procura Logistics Support Assistant e clica no cartão. Será aberta uma página com os detalhes, ligações e partilha.
+
+Os agentes criados ficam guardados localmente no navegador.
